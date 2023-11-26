@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.api.paymenttracke.config.kafka.NotificationKafkaProducer;
+import com.api.paymenttracke.config.KafkaProducerConfig;
 import com.api.paymenttracke.enums.NotificationType;
 import com.api.paymenttracke.models.Notification;
 import com.api.paymenttracke.utils.Utils;
@@ -19,10 +19,10 @@ public class NotificationScheduler {
 
     final private NotificationService notificationService;
 
-    final private NotificationKafkaProducer kafkaProducer;
+    final private KafkaProducerConfig kafkaProducer;
 
     public NotificationScheduler(final NotificationService notificationService,
-            final NotificationKafkaProducer kafkaProducer) {
+            final KafkaProducerConfig kafkaProducer) {
         this.notificationService = notificationService;
         this.kafkaProducer = kafkaProducer;
     }
