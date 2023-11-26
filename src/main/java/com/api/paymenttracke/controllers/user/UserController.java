@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api.paymenttracke.dto.user.UserResponseDTO;
 import com.api.paymenttracke.models.User;
 import com.api.paymenttracke.services.user.UserService;
 
@@ -28,27 +29,23 @@ public class UserController implements UserControllerInterface {
 
     @Override
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable final Long id) {
-        final User user = userService.getUserById(id);
-        if (user != null) {
-            return ResponseEntity.ok(user);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable final Long id) {
+        return userService.getUserById(id)
+                .map(user -> ResponseEntity.ok(user))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Override
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> createUser(@RequestBody final User user) {
-        final User createdUser = userService.createUser(user);
+    public ResponseEntity<UserResponseDTO> createUser(@RequestBody final User user) {
+        final UserResponseDTO createdUser = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-
     @Override
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable final Long id, @RequestBody final User user) {
-        final User updatedUser = userService.updateUser(id, user);
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable final Long id, @RequestBody final User user) {
+        final UserResponseDTO updatedUser = userService.updateUser(id, user);
         if (updatedUser != null) {
             return ResponseEntity.ok(updatedUser);
         } else {
@@ -58,8 +55,9 @@ public class UserController implements UserControllerInterface {
 
     @Override
     @PatchMapping("/{id}")
-    public ResponseEntity<User> partialUpdateUser(@PathVariable final Long id, @RequestBody final User user) {
-        final User partiallyUpdatedUser = userService.partialUpdateUser(id, user);
+    public ResponseEntity<UserResponseDTO> partialUpdateUser(@PathVariable final Long id,
+            @RequestBody final User user) {
+        final UserResponseDTO partiallyUpdatedUser = userService.partialUpdateUser(id, user);
         if (partiallyUpdatedUser != null) {
             return ResponseEntity.ok(partiallyUpdatedUser);
         } else {

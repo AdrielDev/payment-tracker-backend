@@ -2,58 +2,70 @@ package com.api.paymenttracke.services.user;
 
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import com.api.paymenttracke.dto.user.UserResponseDTO;
 import com.api.paymenttracke.models.User;
 import com.api.paymenttracke.repositories.UserRepository;
+
+import io.micrometer.common.util.StringUtils;
 
 @Service
 public class UserService implements UserServiceInterface {
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    private final ModelMapper modelMapper;
+
+    public UserService(final UserRepository userRepository,
+            final ModelMapper modelMapper) {
         this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
+    }
+
+    public Optional<UserResponseDTO> getUserById(Long id) {
+        return userRepository.findById(id)
+                .map(user -> mapUserToDTO(user));
     }
 
     @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public UserResponseDTO createUser(User user) {
+        final User createdUser = userRepository.save(user);
+        return mapUserToDTO(createdUser);
     }
 
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
-
-    @Override
-    public User updateUser(Long id, User user) {
+    public UserResponseDTO updateUser(Long id, User user) {
         if (userRepository.existsById(id)) {
             user.setId(id);
-            return userRepository.save(user);
+            final User updatedUser = userRepository.save(user);
+            return mapUserToDTO(updatedUser);
         }
         return null;
     }
 
     @Override
-    public User partialUpdateUser(Long id, User user) {
-        Optional<User> optionalUser = userRepository.findById(id);
+    public UserResponseDTO partialUpdateUser(Long id, User user) {
+        final Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             User existingUser = optionalUser.get();
-            if (user.getName() != null && !user.getName().isEmpty()) {
+
+            if (StringUtils.isNotBlank(user.getName())) {
                 existingUser.setName(user.getName());
             }
-            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            if (StringUtils.isNotBlank(user.getEmail())) {
                 existingUser.setEmail(user.getEmail());
             }
-            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            if (StringUtils.isNotBlank(user.getPassword())) {
                 existingUser.setPassword(user.getPassword());
             }
-            if (user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty()) {
+            if (StringUtils.isNotBlank(user.getPhoneNumber())) {
                 existingUser.setPhoneNumber(user.getPhoneNumber());
             }
 
-            return userRepository.save(existingUser);
+            final User partiallyUpdatedUser = userRepository.save(existingUser);
+            return mapUserToDTO(partiallyUpdatedUser);
         }
         return null;
     }
@@ -65,5 +77,9 @@ public class UserService implements UserServiceInterface {
             return true;
         }
         return false;
+    }
+
+    private UserResponseDTO mapUserToDTO(User user) {
+        return modelMapper.map(user, UserResponseDTO.class);
     }
 }

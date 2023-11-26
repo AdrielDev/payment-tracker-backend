@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.api.paymenttracke.dto.user.UserResponseDTO;
 import com.api.paymenttracke.models.User;
 
 @Api(tags = { "user" }, value = "User Final")
@@ -31,11 +32,11 @@ public interface UserControllerInterface {
                         @ApiResponse(code = 400, message = "Bad Request"),
                         @ApiResponse(code = 404, message = "Not Found")
         })
-        ResponseEntity<User> getUserById(
+        ResponseEntity<UserResponseDTO> getUserById(
                         @ApiParam(name = "id", type = "Long", value = "id of User", required = true) final Long id);
 
         @PostMapping
-        ResponseEntity<User> createUser(
+        ResponseEntity<UserResponseDTO> createUser(
                         @ApiParam(name = "user", value = "User object to be created", required = true) @RequestBody User user);
 
         @ApiOperation(value = "Update User by id", authorizations = @Authorization("Bearer"), httpMethod = "PUT", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -45,7 +46,7 @@ public interface UserControllerInterface {
                         @ApiResponse(code = 404, message = "Not Found")
         })
         @PutMapping("/{id}")
-        ResponseEntity<User> updateUser(
+        ResponseEntity<UserResponseDTO> updateUser(
                         @ApiParam(name = "id", type = "Long", value = "ID of the User to be updated", required = true) @PathVariable Long id,
                         @ApiParam(name = "user", value = "Updated User object", required = true) @RequestBody User user);
 
@@ -56,7 +57,7 @@ public interface UserControllerInterface {
                         @ApiResponse(code = 404, message = "Not Found")
         })
         @PatchMapping("/{id}")
-        ResponseEntity<User> partialUpdateUser(
+        ResponseEntity<UserResponseDTO> partialUpdateUser(
                         @ApiParam(name = "id", type = "Long", value = "ID of the User to be partially updated", required = true) @PathVariable Long id,
                         @ApiParam(name = "user", value = "Partial updates for the User", required = true) @RequestBody User user);
 
