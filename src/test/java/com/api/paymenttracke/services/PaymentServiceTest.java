@@ -1,10 +1,8 @@
 package com.api.paymenttracke.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -16,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.api.paymenttracke.dto.payment.PaymentRequestDTO;
 import com.api.paymenttracke.models.Payment;
 import com.api.paymenttracke.repositories.PaymentRepository;
 import com.api.paymenttracke.services.payment.PaymentService;
@@ -59,6 +58,8 @@ public class PaymentServiceTest {
     public void createPayment_WithValidPayment_Success() {
         Payment inputPayment = new Payment();
         inputPayment.setAmount(100.0);
+        PaymentRequestDTO inputPaymentDto = new PaymentRequestDTO();
+        inputPaymentDto.setAmount(100.0);
 
         Payment savedPayment = new Payment();
         savedPayment.setId(1L);
@@ -66,7 +67,7 @@ public class PaymentServiceTest {
 
         when(paymentRepository.save(inputPayment)).thenReturn(savedPayment);
 
-        Payment result = paymentService.createPayment(inputPayment);
+        Payment result = paymentService.createPayment(inputPaymentDto);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -76,10 +77,11 @@ public class PaymentServiceTest {
     @Test
     public void createPayment_WithInvalidPayment_Null() {
         Payment inputPayment = new Payment();
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO();
 
         when(paymentRepository.save(inputPayment)).thenReturn(null);
 
-        Payment result = paymentService.createPayment(inputPayment);
+        Payment result = paymentService.createPayment(paymentRequestDTO);
 
         assertNull(result);
     }
@@ -97,11 +99,15 @@ public class PaymentServiceTest {
         updatedPayment.setId(paymentId);
         updatedPayment.setAmount(150.0);
         updatedPayment.setDueDate(LocalDate.of(2023, 11, 11));
+        PaymentRequestDTO updatedPaymentRequestDTO = new PaymentRequestDTO();
+        updatedPayment.setId(paymentId);
+        updatedPayment.setAmount(150.0);
+        updatedPayment.setDueDate(LocalDate.of(2023, 11, 11));
 
         when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(existingPayment));
         when(paymentRepository.save(existingPayment)).thenReturn(updatedPayment);
 
-        Payment result = paymentService.updatePayment(paymentId, updatedPayment);
+        Payment result = paymentService.updatePayment(paymentId, updatedPaymentRequestDTO);
 
         assertEquals(paymentId, result.getId());
         assertEquals(150.0, result.getAmount(), 0.01);
@@ -111,11 +117,11 @@ public class PaymentServiceTest {
     @Test
     public void updatePayment_WithNonExistingPayment_Null() {
         Long paymentId = 1L;
-        Payment updatedPayment = new Payment();
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO();
 
         when(paymentRepository.findById(paymentId)).thenReturn(Optional.empty());
 
-        Payment result = paymentService.updatePayment(paymentId, updatedPayment);
+        Payment result = paymentService.updatePayment(paymentId, paymentRequestDTO);
 
         assertNull(result);
     }
@@ -126,9 +132,7 @@ public class PaymentServiceTest {
 
         when(paymentRepository.existsById(paymentId)).thenReturn(true);
 
-        boolean result = paymentService.deletePayment(paymentId);
-
-        assertTrue(result);
+        paymentService.deletePayment(paymentId);
     }
 
     @Test
@@ -137,8 +141,6 @@ public class PaymentServiceTest {
 
         when(paymentRepository.existsById(paymentId)).thenReturn(false);
 
-        boolean result = paymentService.deletePayment(paymentId);
-
-        assertFalse(result);
+        paymentService.deletePayment(paymentId);
     }
 }
