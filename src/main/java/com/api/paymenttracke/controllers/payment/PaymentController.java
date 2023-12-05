@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api.paymenttracke.dto.payment.PaymentRequestDTO;
 import com.api.paymenttracke.enums.PaymentStatus;
 import com.api.paymenttracke.models.Payment;
 import com.api.paymenttracke.services.payment.PaymentService;
@@ -20,7 +21,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/payments")
-public class PaymentController {
+public class PaymentController implements PaymentControllerInterface {
 
     private final PaymentService paymentService;
 
@@ -31,45 +32,32 @@ public class PaymentController {
     @GetMapping("/{id}")
     public ResponseEntity<Payment> getPaymentById(@PathVariable Long id) {
         final Payment payment = paymentService.getPaymentById(id);
-        if (payment != null) {
-            return ResponseEntity.ok(payment);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(payment);
     }
 
     @PostMapping
-    public ResponseEntity<Payment> createPayment(@Valid @RequestBody final Payment payment) {
+    public ResponseEntity<Payment> createPayment(@Valid @RequestBody final PaymentRequestDTO payment) {
         final Payment createdPayment = paymentService.createPayment(payment);
         return new ResponseEntity<>(createdPayment, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Payment> updatePayment(@PathVariable final Long id, @Valid @RequestBody final Payment updatedPayment) {
+    public ResponseEntity<Payment> updatePayment(@PathVariable final Long id,
+            @Valid @RequestBody final PaymentRequestDTO updatedPayment) {
         final Payment updated = paymentService.updatePayment(id, updatedPayment);
-        if (updated == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         return ResponseEntity.ok(updated);
     }
 
     @PatchMapping("/{id}/status/{status}")
-    public ResponseEntity<Void> updateStatusPayment(@PathVariable final Long id, @PathVariable final PaymentStatus status) {
-        final Boolean updated = paymentService.updateStatusPayment(id, status);
-        if (updated == null) {
-            return ResponseEntity.notFound().build();
-        }
-
+    public ResponseEntity<Void> updateStatusPayment(@PathVariable final Long id,
+            @PathVariable final PaymentStatus status) {
+        paymentService.updateStatusPayment(id, status);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePayment(@PathVariable final Long id) {
-        if (paymentService.deletePayment(id)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        paymentService.deletePayment(id);
+        return ResponseEntity.noContent().build();
     }
 }

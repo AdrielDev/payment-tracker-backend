@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.api.paymenttracke.dto.notification.NotificationRequestDTO;
 import com.api.paymenttracke.models.Notification;
 
 @Api(tags = { "notification" }, value = "Notification")
@@ -45,7 +46,7 @@ public interface NotificationControllerInterface {
             @ApiResponse(code = 400, message = "Bad Request")
     })
     ResponseEntity<Notification> createNotification(
-            @ApiParam(name = "notification", value = "Notification object to be created", required = true) Notification notification);
+            @ApiParam(name = "notification", value = "Notification object to be created", required = true) NotificationRequestDTO notification);
 
     @PutMapping("/{id}")
     @ApiOperation(value = "Update Notification by ID", httpMethod = "PUT", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -55,7 +56,7 @@ public interface NotificationControllerInterface {
     })
     ResponseEntity<Notification> updateNotification(
             @ApiParam(name = "id", type = "Long", value = "ID of the Notification to be updated", required = true) Long id,
-            @ApiParam(name = "notification", value = "Updated Notification object", required = true) Notification updatedNotification);
+            @ApiParam(name = "notification", value = "Updated Notification object", required = true) NotificationRequestDTO updatedNotification);
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "Delete Notification by ID", httpMethod = "DELETE")

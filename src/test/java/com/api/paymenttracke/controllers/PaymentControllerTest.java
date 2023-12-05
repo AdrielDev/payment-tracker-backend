@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.api.paymenttracke.controllers.payment.PaymentController;
+import com.api.paymenttracke.dto.payment.PaymentRequestDTO;
 import com.api.paymenttracke.exception.InvalidPaymentDataException;
 import com.api.paymenttracke.models.Payment;
 import com.api.paymenttracke.services.payment.PaymentService;
@@ -67,7 +68,7 @@ public class PaymentControllerTest {
     public void testCreatePayment_WithValidData_Created() throws Exception {
         final Payment payment = createPayment(null);
 
-        when(paymentService.createPayment(any(Payment.class))).thenReturn(payment);
+        when(paymentService.createPayment(any(PaymentRequestDTO.class))).thenReturn(payment);
 
         mockMvc.perform(post("/payments")
                 .content(objectMapper.writeValueAsString(payment))
@@ -81,7 +82,7 @@ public class PaymentControllerTest {
         Payment payment = new Payment();
         payment.setAmount(-50.00); // Invalid amount
 
-        when(paymentService.createPayment(any(Payment.class)))
+        when(paymentService.createPayment(any(PaymentRequestDTO.class)))
                 .thenThrow(InvalidPaymentDataException.class);
 
         mockMvc.perform(post("/payments")
@@ -98,7 +99,7 @@ public class PaymentControllerTest {
         payment.setId(paymentId);
         payment.setDueDate(LocalDate.now().plusDays(10));
 
-        when(paymentService.updatePayment(anyLong(), any(Payment.class))).thenReturn(payment);
+        when(paymentService.updatePayment(anyLong(), any(PaymentRequestDTO.class))).thenReturn(payment);
 
         mockMvc.perform(put("/payments/{id}", 10L)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -109,7 +110,7 @@ public class PaymentControllerTest {
 
     @Test
     public void updatePayment_WithValidData_BadRequest() throws Exception {
-        Payment payment = new Payment();
+        PaymentRequestDTO payment = new PaymentRequestDTO();
         payment.setAmount(-50.0);
         payment.setId(10L);
         payment.setDueDate(LocalDate.now().plusDays(10));
@@ -127,20 +128,8 @@ public class PaymentControllerTest {
     public void deletePayment_WithValidId_ShouldReturn204NoContent() throws Exception {
         final Long paymentId = -1L;
 
-        when(paymentService.deletePayment(paymentId)).thenReturn(true);
-
         mockMvc.perform(delete("/payments/{id}", paymentId))
                 .andExpect(status().isNoContent());
-    }
-
-    @Test
-    public void deletePayment_WithInvalidId_ShouldReturn404NotFound() throws Exception {
-        final Long paymentId = -1L;
-
-        when(paymentService.deletePayment(paymentId)).thenReturn(false);
-
-        mockMvc.perform(delete("/payments/{id}", paymentId))
-                .andExpect(status().isNotFound());
     }
 
     private Payment createPayment(final Long id) {

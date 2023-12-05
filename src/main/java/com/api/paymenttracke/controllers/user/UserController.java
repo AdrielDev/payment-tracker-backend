@@ -30,9 +30,7 @@ public class UserController implements UserControllerInterface {
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable final Long id) {
-        return userService.getUserById(id)
-                .map(user -> ResponseEntity.ok(user))
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @Override
@@ -45,12 +43,7 @@ public class UserController implements UserControllerInterface {
     @Override
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable final Long id, @RequestBody final User user) {
-        final UserResponseDTO updatedUser = userService.updateUser(id, user);
-        if (updatedUser != null) {
-            return ResponseEntity.ok(updatedUser);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(userService.updateUser(id, user));
     }
 
     @Override
@@ -58,20 +51,13 @@ public class UserController implements UserControllerInterface {
     public ResponseEntity<UserResponseDTO> partialUpdateUser(@PathVariable final Long id,
             @RequestBody final User user) {
         final UserResponseDTO partiallyUpdatedUser = userService.partialUpdateUser(id, user);
-        if (partiallyUpdatedUser != null) {
-            return ResponseEntity.ok(partiallyUpdatedUser);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(partiallyUpdatedUser);
     }
 
     @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable final Long id) {
-        if (userService.deleteUser(id)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }
