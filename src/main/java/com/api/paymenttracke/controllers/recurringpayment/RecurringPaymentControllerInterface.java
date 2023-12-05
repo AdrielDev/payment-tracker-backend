@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.api.paymenttracke.models.RecurringPayment;
+import com.api.paymenttracke.dto.recurringpayment.RecurringPaymentRequestDTO;
+import com.api.paymenttracke.dto.recurringpayment.RecurringPaymentResponseDTO;
 
 @Api(tags = { "recurring-payments" }, value = "Recurring Payments")
 @RequestMapping("/recurring-payments")
@@ -33,7 +34,7 @@ public interface RecurringPaymentControllerInterface {
                         @ApiResponse(code = 400, message = "Bad Request"),
                         @ApiResponse(code = 404, message = "Not Found")
         })
-        ResponseEntity<RecurringPayment> getRecurringPaymentById(
+        ResponseEntity<RecurringPaymentResponseDTO> getRecurringPaymentById(
                         @ApiParam(name = "id", type = "Long", value = "ID of Recurring Payment", required = true) final Long id);
 
         @GetMapping("/all")
@@ -41,11 +42,11 @@ public interface RecurringPaymentControllerInterface {
         @ApiResponses({
                         @ApiResponse(code = 200, message = "OK")
         })
-        ResponseEntity<List<RecurringPayment>> getAllRecurringPayment();
+        ResponseEntity<List<RecurringPaymentResponseDTO>> getAllRecurringPayment();
 
         @PostMapping
-        ResponseEntity<RecurringPayment> createRecurringPayment(
-                        @ApiParam(name = "recurringPayment", value = "Recurring Payment object to be created", required = true) @RequestBody RecurringPayment recurringPayment);
+        ResponseEntity<RecurringPaymentResponseDTO> createRecurringPayment(
+                        @ApiParam(name = "recurringPayment", value = "Recurring Payment object to be created", required = true) @RequestBody RecurringPaymentRequestDTO recurringPayment);
 
         @ApiOperation(value = "Update Recurring Payment by ID", authorizations = @Authorization("Bearer"), httpMethod = "PUT", produces = MediaType.APPLICATION_JSON_VALUE)
         @ApiResponses({
@@ -54,9 +55,9 @@ public interface RecurringPaymentControllerInterface {
                         @ApiResponse(code = 404, message = "Not Found")
         })
         @PutMapping("/{id}")
-        ResponseEntity<RecurringPayment> updateRecurringPayment(
+        ResponseEntity<RecurringPaymentResponseDTO> updateRecurringPayment(
                         @ApiParam(name = "id", type = "Long", value = "ID of the Recurring Payment to be updated", required = true) @PathVariable Long id,
-                        @ApiParam(name = "recurringPayment", value = "Updated Recurring Payment object", required = true) @RequestBody RecurringPayment recurringPayment);
+                        @ApiParam(name = "recurringPaymentRequest", value = "Updated Recurring Payment object", required = true) @RequestBody RecurringPaymentRequestDTO recurringPayment);
 
         @ApiOperation(value = "Partial Update Recurring Payment by ID", authorizations = @Authorization("Bearer"), httpMethod = "PATCH", produces = MediaType.APPLICATION_JSON_VALUE)
         @ApiResponses({
@@ -65,9 +66,9 @@ public interface RecurringPaymentControllerInterface {
                         @ApiResponse(code = 404, message = "Not Found")
         })
         @PatchMapping("/{id}")
-        ResponseEntity<RecurringPayment> partialUpdateRecurringPayment(
+        ResponseEntity<RecurringPaymentResponseDTO> partialUpdateRecurringPayment(
                         @ApiParam(name = "id", type = "Long", value = "ID of the Recurring Payment to be partially updated", required = true) @PathVariable Long id,
-                        @ApiParam(name = "recurringPayment", value = "Partial updates for the Recurring Payment", required = true) @RequestBody RecurringPayment recurringPayment);
+                        @ApiParam(name = "recurringPaymentRequest", value = "Partial updates for the Recurring Payment", required = true) @RequestBody RecurringPaymentRequestDTO recurringPayment);
 
         @ApiOperation(value = "Delete Recurring Payment by ID", authorizations = @Authorization("Bearer"), httpMethod = "DELETE")
         @ApiResponses({

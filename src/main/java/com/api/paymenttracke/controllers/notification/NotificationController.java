@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api.paymenttracke.dto.notification.NotificationRequestDTO;
 import com.api.paymenttracke.models.Notification;
 import com.api.paymenttracke.services.notification.NotificationService;
 
@@ -29,11 +30,7 @@ public class NotificationController implements NotificationControllerInterface {
     @GetMapping("/{id}")
     public ResponseEntity<Notification> getNotificationById(@PathVariable Long id) {
         final Notification notification = notificationService.getNotificationById(id);
-        if (notification != null) {
-            return ResponseEntity.ok(notification);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(notification);
     }
 
     @GetMapping("/all")
@@ -43,26 +40,21 @@ public class NotificationController implements NotificationControllerInterface {
     }
 
     @PostMapping
-    public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
+    public ResponseEntity<Notification> createNotification(@RequestBody NotificationRequestDTO notification) {
         final Notification createdNotification = notificationService.createNotification(notification);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdNotification);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Notification> updateNotification(@PathVariable Long id, @RequestBody Notification updatedNotification) {
+    public ResponseEntity<Notification> updateNotification(@PathVariable Long id,
+            @RequestBody NotificationRequestDTO updatedNotification) {
         final Notification notification = notificationService.updateNotification(id, updatedNotification);
-        if (notification != null) {
-            return ResponseEntity.ok(notification);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(notification);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
-        if (notificationService.deleteNotification(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        notificationService.deleteNotification(id);
+        return ResponseEntity.noContent().build();
     }
 }

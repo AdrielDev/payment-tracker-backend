@@ -1,55 +1,79 @@
 package com.api.paymenttracke.services.recurringpayment;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.api.paymenttracke.dto.recurringpayment.RecurringPaymentRequestDTO;
+import com.api.paymenttracke.dto.recurringpayment.RecurringPaymentResponseDTO;
+import com.api.paymenttracke.enums.PaymentStatus;
+import com.api.paymenttracke.exception.ResourceNotFoundException;
 import com.api.paymenttracke.models.RecurringPayment;
 import com.api.paymenttracke.repositories.RecurringPaymentRepository;
+
+import io.micrometer.common.util.StringUtils;
 
 @Service
 public class RecurringPaymentService implements RecurringPaymentServiceInterface {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecurringPaymentService.class);
+
     private final RecurringPaymentRepository recurringPaymentRepository;
 
-    public RecurringPaymentService(RecurringPaymentRepository recurringPaymentRepository) {
+    private final ModelMapper modelMapper;
+
+    public RecurringPaymentService(RecurringPaymentRepository recurringPaymentRepository,
+            ModelMapper modelMapper) {
         this.recurringPaymentRepository = recurringPaymentRepository;
+        this.modelMapper = modelMapper;
     }
 
-    public RecurringPayment getRecurringPaymentById(final Long id) {
-        return recurringPaymentRepository.findById(id).orElse(null);
+    public RecurringPaymentResponseDTO getRecurringPaymentById(final Long id) {
+        return recurringPaymentRepository.findById(id)
+                .map(this::mapRecurringPaymentToDto)
+                .orElseThrow(() -> new ResourceNotFoundException(RecurringPayment.class, id));
     }
 
-    public List<RecurringPayment> getAllRecurringPayments() {
-        return recurringPaymentRepository.findAll();
+    public List<RecurringPaymentResponseDTO> getAllRecurringPayments() {
+        return recurringPaymentRepository.findAll().stream()
+                .map(this::mapRecurringPaymentToDto)
+                .collect(Collectors.toList());
     }
 
-    public RecurringPayment createRecurringPayment(final RecurringPayment recurringPayment) {
-        return recurringPaymentRepository.save(recurringPayment);
+    public RecurringPaymentResponseDTO createRecurringPayment(final RecurringPaymentRequestDTO requestDTO) {
+        final RecurringPayment recurringPayment = mapDtoToRecurringPayment(requestDTO);
+        return mapRecurringPaymentToDto(recurringPaymentRepository.save(recurringPayment));
     }
 
-    public RecurringPayment updateRecurringPayment(final Long id, final RecurringPayment updatedRecurringPayment) {
-        RecurringPayment existingRecurringPayment = recurringPaymentRepository.findById(id).orElse(null);
-        if (existingRecurringPayment == null) {
-            return null;
-        }
+    public RecurringPaymentResponseDTO updateRecurringPayment(final Long id, final RecurringPaymentRequestDTO updatedRecurringPayment) {
+        final RecurringPayment existingRecurringPayment = recurringPaymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(RecurringPayment.class, id));
 
-        existingRecurringPayment.setDescription(updatedRecurringPayment.getDescription());
-        existingRecurringPayment.setInstallmentAmount(updatedRecurringPayment.getInstallmentAmount());
-        existingRecurringPayment.setInstallmentValue(updatedRecurringPayment.getInstallmentValue());
-        existingRecurringPayment.setTotalInstallments(updatedRecurringPayment.getTotalInstallments());
-        existingRecurringPayment.setStatus(updatedRecurringPayment.getStatus());
+        final RecurringPayment updatedRecurringPaymentRequest = mapDtoToRecurringPayment(updatedRecurringPayment);
 
-        return recurringPaymentRepository.save(existingRecurringPayment);
+        existingRecurringPayment.setDescription(updatedRecurringPaymentRequest.getDescription());
+        existingRecurringPayment.setInstallmentAmount(updatedRecurringPaymentRequest.getInstallmentAmount());
+        existingRecurringPayment.setInstallmentValue(updatedRecurringPaymentRequest.getInstallmentValue());
+        existingRecurringPayment.setTotalInstallments(updatedRecurringPaymentRequest.getTotalInstallments());
+        existingRecurringPayment.setStatus(updatedRecurringPaymentRequest.getStatus());
+
+        final RecurringPayment savedRecurringPayment = recurringPaymentRepository.save(existingRecurringPayment);
+
+        return mapRecurringPaymentToDto(savedRecurringPayment);
     }
 
-    public RecurringPayment partialUpdateRecurringPayment(final Long id, final RecurringPayment partialRecurringPayment) {
-        RecurringPayment existingRecurringPayment = recurringPaymentRepository.findById(id).orElse(null);
-        if (existingRecurringPayment == null) {
-            return null;
-        }
+    public RecurringPaymentResponseDTO partialUpdateRecurringPayment(final Long id,
+            final RecurringPaymentRequestDTO partialRecurringPayment) {
+        RecurringPayment existingRecurringPayment = recurringPaymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(RecurringPayment.class, id));
 
-        if (partialRecurringPayment.getDescription() != null) {
+        LOGGER.debug("Updating recurring payment with ID {}: {}", id, partialRecurringPayment);
+
+        if (StringUtils.isNotBlank(partialRecurringPayment.getDescription())) {
             existingRecurringPayment.setDescription(partialRecurringPayment.getDescription());
         }
         if (partialRecurringPayment.getInstallmentAmount() != null) {
@@ -62,17 +86,28 @@ public class RecurringPaymentService implements RecurringPaymentServiceInterface
             existingRecurringPayment.setTotalInstallments(partialRecurringPayment.getTotalInstallments());
         }
         if (partialRecurringPayment.getStatus() != null) {
-            existingRecurringPayment.setStatus(partialRecurringPayment.getStatus());
+            existingRecurringPayment.setStatus(PaymentStatus.valueOf(partialRecurringPayment.getStatus()));
         }
 
-        return recurringPaymentRepository.save(existingRecurringPayment);
+        final RecurringPayment savedRecurringPayment = recurringPaymentRepository.save(existingRecurringPayment);
+
+        LOGGER.debug("Recurring payment updated: {}", savedRecurringPayment);
+
+        return mapRecurringPaymentToDto(savedRecurringPayment);
     }
 
-    public boolean deleteRecurringPayment(final Long id) {
-        if (recurringPaymentRepository.existsById(id)) {
-            recurringPaymentRepository.deleteById(id);
-            return true;
+    public void deleteRecurringPayment(final Long id) {
+        if (!recurringPaymentRepository.existsById(id)) {
+            throw new ResourceNotFoundException(RecurringPayment.class, id);
         }
-        return false;
+        recurringPaymentRepository.deleteById(id);
+    }
+
+    private RecurringPaymentResponseDTO mapRecurringPaymentToDto(final RecurringPayment recurringPayment) {
+        return modelMapper.map(recurringPayment, RecurringPaymentResponseDTO.class);
+    }
+
+    private RecurringPayment mapDtoToRecurringPayment(final RecurringPaymentRequestDTO requestDTO) {
+        return modelMapper.map(requestDTO, RecurringPayment.class);
     }
 }

@@ -1,13 +1,11 @@
 package com.api.paymenttracke.services.user;
 
-import java.util.Optional;
-
 import com.api.paymenttracke.dto.user.UserResponseDTO;
 import com.api.paymenttracke.models.User;
 
 interface UserServiceInterface {
     
-    Optional<UserResponseDTO> getUserById(final Long id);
+    UserResponseDTO getUserById(final Long id);
 
     UserResponseDTO createUser(final User user);
 
@@ -15,5 +13,5 @@ interface UserServiceInterface {
 
     UserResponseDTO partialUpdateUser(final Long id, final User user);
 
-    boolean deleteUser(final Long id);
+    void deleteUser(final Long id);
 }

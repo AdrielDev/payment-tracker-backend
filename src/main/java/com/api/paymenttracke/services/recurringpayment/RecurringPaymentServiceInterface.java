@@ -2,18 +2,19 @@ package com.api.paymenttracke.services.recurringpayment;
 
 import java.util.List;
 
-import com.api.paymenttracke.models.RecurringPayment;
+import com.api.paymenttracke.dto.recurringpayment.RecurringPaymentRequestDTO;
+import com.api.paymenttracke.dto.recurringpayment.RecurringPaymentResponseDTO;
 
 public interface RecurringPaymentServiceInterface {
-    RecurringPayment getRecurringPaymentById(final Long id);
+    RecurringPaymentResponseDTO getRecurringPaymentById(final Long id);
 
-    List<RecurringPayment> getAllRecurringPayments();
+    List<RecurringPaymentResponseDTO> getAllRecurringPayments();
 
-    RecurringPayment createRecurringPayment(final RecurringPayment recurringPayment);
+    RecurringPaymentResponseDTO createRecurringPayment(final RecurringPaymentRequestDTO recurringPayment);
 
-    RecurringPayment updateRecurringPayment(final Long id, final RecurringPayment updatedRecurringPayment);
+    RecurringPaymentResponseDTO updateRecurringPayment(final Long id, final RecurringPaymentRequestDTO updatedRecurringPayment);
 
-    RecurringPayment partialUpdateRecurringPayment(final Long id, final RecurringPayment partialRecurringPayment);
+    RecurringPaymentResponseDTO partialUpdateRecurringPayment(final Long id, final RecurringPaymentRequestDTO partialRecurringPayment);
 
-    boolean deleteRecurringPayment(final Long id);
+    void deleteRecurringPayment(final Long id);
 }

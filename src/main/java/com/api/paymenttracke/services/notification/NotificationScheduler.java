@@ -48,12 +48,16 @@ public class NotificationScheduler {
         try {
             kafkaProducer.sendNotificationToKafka(message, topic);
 
-            logger.info("Notification sent to Kafka - ID: {}, Type: {}, Topic: {}", notification.getId(),
-                    notificationType, topic);
-        } catch (Exception e) {
-            logger.error("Error processing notification - ID: {}, Type: {}, Topic: {}", notification.getId(),
+            logger.info("Notification sent to Kafka - ID: {}, Type: {}, Topic: {}",
+                    notification.getId(),
                     notificationType,
-                    topic, e);
+                    topic);
+        } catch (Exception e) {
+            logger.error("Error processing notification - ID: {}, Type: {}, Topic: {}",
+                    notification.getId(),
+                    notificationType,
+                    topic, 
+                    e);
         }
     }
 }

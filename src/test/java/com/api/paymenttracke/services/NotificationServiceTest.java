@@ -1,10 +1,8 @@
 package com.api.paymenttracke.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -17,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.api.paymenttracke.dto.notification.NotificationRequestDTO;
 import com.api.paymenttracke.models.Notification;
 import com.api.paymenttracke.repositories.NotificationRepository;
 import com.api.paymenttracke.services.notification.NotificationService;
@@ -75,6 +74,8 @@ public class NotificationServiceTest {
     public void createNotification_WithValidNotification_Success() {
         final Notification inputNotification = new Notification();
         inputNotification.setMessageContent("Sample Message");
+        final NotificationRequestDTO inputNotificationRequestDTO = new NotificationRequestDTO();
+        inputNotification.setMessageContent("Sample Message");
 
         final Notification savedNotification = new Notification();
         savedNotification.setId(1L);
@@ -82,7 +83,7 @@ public class NotificationServiceTest {
 
         when(notificationRepository.save(inputNotification)).thenReturn(savedNotification);
 
-        final Notification result = notificationService.createNotification(inputNotification);
+        final Notification result = notificationService.createNotification(inputNotificationRequestDTO);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -92,10 +93,11 @@ public class NotificationServiceTest {
     @Test
     public void createNotification_WithInvalidNotification_Null() {
         final Notification inputNotification = new Notification();
+        final NotificationRequestDTO inputNotificationRequestDTO = new NotificationRequestDTO();
 
         when(notificationRepository.save(inputNotification)).thenReturn(null);
 
-        final Notification result = notificationService.createNotification(inputNotification);
+        final Notification result = notificationService.createNotification(inputNotificationRequestDTO);
 
         assertNull(result);
     }
@@ -111,11 +113,14 @@ public class NotificationServiceTest {
         final Notification updatedNotification = new Notification();
         updatedNotification.setId(notificationId);
         updatedNotification.setMessageContent("Updated Message");
+        final NotificationRequestDTO updatedNotificationRequestDTO = new NotificationRequestDTO();
+        updatedNotification.setId(notificationId);
+        updatedNotification.setMessageContent("Updated Message");
 
         when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
         when(notificationRepository.save(existingNotification)).thenReturn(updatedNotification);
 
-        final Notification result = notificationService.updateNotification(notificationId, updatedNotification);
+        final Notification result = notificationService.updateNotification(notificationId, updatedNotificationRequestDTO);
 
         assertEquals(notificationId, result.getId());
         assertEquals("Updated Message", result.getMessageContent());
@@ -124,11 +129,11 @@ public class NotificationServiceTest {
     @Test
     public void updateNotification_WithNonExistingNotification_Null() {
         final Long notificationId = 1L;
-        final Notification updatedNotification = new Notification();
+        final NotificationRequestDTO notificationRequestDTO = new NotificationRequestDTO();
 
         when(notificationRepository.findById(notificationId)).thenReturn(Optional.empty());
 
-        final Notification result = notificationService.updateNotification(notificationId, updatedNotification);
+        final Notification result = notificationService.updateNotification(notificationId, notificationRequestDTO);
 
         assertNull(result);
     }
@@ -139,9 +144,7 @@ public class NotificationServiceTest {
 
         when(notificationRepository.existsById(notificationId)).thenReturn(true);
 
-        boolean result = notificationService.deleteNotification(notificationId);
-
-        assertTrue(result);
+        notificationService.deleteNotification(notificationId);
     }
 
     @Test
@@ -150,8 +153,6 @@ public class NotificationServiceTest {
 
         when(notificationRepository.existsById(notificationId)).thenReturn(false);
 
-        boolean result = notificationService.deleteNotification(notificationId);
-
-        assertFalse(result);
+        notificationService.deleteNotification(notificationId);
     }
 }
